@@ -8,6 +8,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import TimezoneSelect, { ITimezone } from "react-timezone-select";
@@ -24,6 +25,33 @@ const Button = ({ ...props }: any) => {
   return (
     <button className="text-lg bg-gray-900 px-4 py-1 text-white" {...props} />
   );
+};
+
+/**
+ * @function useOnClickOutside
+ * @description Handles the click outside logic and returns the `onOutsideClick` callback to handle the logic after the component is unmounted
+ */
+const useOnClickOutside = <T extends HTMLElement>(
+  ref: React.RefObject<T>,
+  onOutsideClick: (event: MouseEvent | TouchEvent) => void
+) => {
+  useEffect(() => {
+    const touchListener = <U extends MouseEvent | TouchEvent>(event: U) => {
+      if (!ref.current || ref.current.contains(event?.target as Node)) {
+        // if clicked element is inside the ref element, do nothing
+        return;
+      }
+      onOutsideClick(event);
+    };
+
+    document.addEventListener("mousedown", touchListener); // for desktop
+    document.addEventListener("touchstart", touchListener); // for mobile
+
+    return () => {
+      document.removeEventListener("mousedown", touchListener);
+      document.removeEventListener("touchstart", touchListener);
+    };
+  }, [ref, onOutsideClick]);
 };
 
 const Home: NextPage = () => {
@@ -146,9 +174,9 @@ export const DayRanges = ({
 
   return (
     <div className="flex items-center space-x-3">
-      <LazySelect name="start" value={currentDayRange.start} />
+      <LazySelect max={maxStart} name="start" value={currentDayRange.start} />
       <span>-</span>
-      <LazySelect name="end" value={currentDayRange.end} />
+      <LazySelect min={minEnd} name="end" value={currentDayRange.end} />
     </div>
   );
 };
@@ -165,18 +193,35 @@ const LazySelect = ({
   min?: ConfigType;
   max?: ConfigType;
 }) => {
+  const selectRef = useRef<HTMLSelectElement>(null);
   const { options, filter } = useOptions();
   const [selected, setSelected] = useState<any>();
-
-  console.log(selected);
+  const [open, setOpen] = useState(false);
+  useOnClickOutside(selectRef, () => {
+    setOpen(false);
+  });
 
   useEffect(() => {
     filter({ current: value });
-  }, [filter, value, max, min]);
+  }, [filter, value]);
+
+  useEffect(() => {
+    if (open) {
+      if (min) {
+        filter({ offset: min });
+      }
+      if (max) {
+        filter({ limit: max });
+      }
+    }
+  }, [filter, max, min, open]);
+
+  console.log("!", value);
 
   return (
     <select
       name={name}
+      onClick={() => setOpen(true)}
       className="max-h-56"
       value={
         options.find(
