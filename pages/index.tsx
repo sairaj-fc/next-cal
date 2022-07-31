@@ -59,7 +59,7 @@ const Home: NextPage = () => {
   const [usrname, setUsrname] = useState("");
 
   return (
-    <div className="w-1/4  mx-auto">
+    <div className="w-1/2  mx-auto">
       <div className=" mt-16 space-y-4">
         <div>
           <div className="text-base flex items-center justify-between mb-1">
@@ -131,7 +131,7 @@ type ScheduleBlockProps = {
 };
 const ScheduleBlock = ({ name, weekday, day }: ScheduleBlockProps) => {
   const [checked, setChecked] = useState(false);
-  const { schedule } = useAvailability();
+  const { schedule, setSchedule } = useAvailability();
 
   const values = schedule[day];
 
@@ -144,6 +144,17 @@ const ScheduleBlock = ({ name, weekday, day }: ScheduleBlockProps) => {
           onChange={(e) => {
             const checked = e.target.checked;
             setChecked(checked);
+            if (checked) {
+              const index = day;
+              const newSchedule = schedule;
+              newSchedule[index] = [defaultDayRange];
+              setSchedule(newSchedule);
+            } else {
+              const index = day;
+              const newSchedule = schedule;
+              newSchedule[index] = [];
+              setSchedule(newSchedule);
+            }
           }}
           type="checkbox"
         />
@@ -151,7 +162,7 @@ const ScheduleBlock = ({ name, weekday, day }: ScheduleBlockProps) => {
       </label>
       <div>
         {values.length > 0 ? (
-          <DayRanges dayRanges={values} name={`${name}.${day}`} />
+          <DayRanges day={day} dayRanges={values} name={`${name}.${day}`} />
         ) : (
           <div>No Availability</div>
         )}
@@ -163,9 +174,11 @@ const ScheduleBlock = ({ name, weekday, day }: ScheduleBlockProps) => {
 export const DayRanges = ({
   name,
   dayRanges,
+  day,
 }: {
   name: string;
   dayRanges: TimeRange[];
+  day: number;
 }) => {
   const currentDayRange = dayRanges[0];
 
@@ -174,32 +187,47 @@ export const DayRanges = ({
 
   return (
     <div className="flex items-center space-x-3">
-      <LazySelect max={maxStart} name="start" value={currentDayRange.start} />
+      <LazySelect
+        day={day}
+        max={maxStart}
+        type="start"
+        value={currentDayRange.start}
+      />
       <span>-</span>
-      <LazySelect min={minEnd} name="end" value={currentDayRange.end} />
+      <LazySelect
+        day={day}
+        min={minEnd}
+        type="end"
+        value={currentDayRange.end}
+      />
     </div>
   );
 };
 
 const LazySelect = ({
-  name,
+  type,
   value,
   min,
   max,
+  day,
   ...props
 }: {
-  name: string;
+  type: "start" | "end";
   value?: ConfigType;
   min?: ConfigType;
   max?: ConfigType;
+  day: number;
 }) => {
   const selectRef = useRef<HTMLSelectElement>(null);
-  const { options, filter } = useOptions();
-  const [selected, setSelected] = useState<any>();
+  const { filter, options } = useOptions();
+  const { setSchedule, schedule } = useAvailability();
+
   const [open, setOpen] = useState(false);
   useOnClickOutside(selectRef, () => {
     setOpen(false);
   });
+
+  console.log(day === 0 && type === "start" && open);
 
   useEffect(() => {
     filter({ current: value });
@@ -216,11 +244,9 @@ const LazySelect = ({
     }
   }, [filter, max, min, open]);
 
-  console.log("!", value);
-
   return (
     <select
-      name={name}
+      name={type}
       onClick={() => setOpen(true)}
       className="max-h-56"
       value={
@@ -229,7 +255,14 @@ const LazySelect = ({
         )?.value
       }
       onChange={(e) => {
-        setSelected(new Date(e.target.value));
+        const value = new Date(+e.target.value);
+        const newSchedule = [...schedule];
+        newSchedule[day][0] = {
+          ...newSchedule[day][0],
+          [type]: value,
+        };
+        setSchedule(newSchedule);
+        setOpen(false);
       }}
       {...props}
     >
@@ -299,5 +332,5 @@ const useOptions = () => {
     [options]
   );
 
-  return { options: filteredOptions, filter };
+  return { options: filteredOptions, filter, unfilteredOptions: options };
 };
