@@ -1,8 +1,8 @@
 import type { NextPage } from "next";
-import { useRouter } from "next/router";
 import {
   createContext,
   Dispatch,
+  FormEvent,
   SetStateAction,
   useCallback,
   useContext,
@@ -108,6 +108,11 @@ const useAvailability = () => useContext(AvailabilityContext);
 const Availablility = ({ name }: { name: string }) => {
   const [schedule, setSchedule] = useState(DEFAULT_SCHEDULE);
 
+  const onSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    console.log(schedule);
+  };
+
   return (
     <AvailabilityContext.Provider
       value={{
@@ -115,11 +120,14 @@ const Availablility = ({ name }: { name: string }) => {
         setSchedule,
       }}
     >
-      <fieldset className="divide-y divide-gray-200 my-16">
-        {weekdayNames("en").map((weekday, num) => (
-          <ScheduleBlock key={num} name={name} weekday={weekday} day={num} />
-        ))}
-      </fieldset>
+      <form onSubmit={onSubmit}>
+        <fieldset className="divide-y divide-gray-200 my-16">
+          {weekdayNames("en").map((weekday, num) => (
+            <ScheduleBlock key={num} name={name} weekday={weekday} day={num} />
+          ))}
+        </fieldset>
+        <Button type="submit">Submit</Button>
+      </form>
     </AvailabilityContext.Provider>
   );
 };
@@ -130,8 +138,8 @@ type ScheduleBlockProps = {
   name: string;
 };
 const ScheduleBlock = ({ name, weekday, day }: ScheduleBlockProps) => {
-  const [checked, setChecked] = useState(false);
   const { schedule, setSchedule } = useAvailability();
+  const [checked, setChecked] = useState(() => schedule[day].length > 0);
 
   const values = schedule[day];
 
