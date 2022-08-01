@@ -110,7 +110,6 @@ const Availablility = ({ name }: { name: string }) => {
 
   const onSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log(schedule);
   };
 
   return (
@@ -234,8 +233,6 @@ const LazySelect = ({
   useOnClickOutside(selectRef, () => {
     setOpen(false);
   });
-
-  console.log(day === 0 && type === "start" && open);
 
   useEffect(() => {
     filter({ current: value });

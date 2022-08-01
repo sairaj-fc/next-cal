@@ -1,0 +1,80 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         String   @id @default(cuid())
+  username   String?  @unique
+  name       String?
+  email      String   @unique
+  password   String
+  timezone   String   @default("Asia/Kolkata")
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  // ******* RELATIONS ********* //
+  event_type   EventType[]
+  schedule     Schedule[]
+  availability Availability[]
+}
+
+model EventType {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String
+  length      Int
+  time_zone   String
+  description String?
+  locations   Json?
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  // ******* RELATIONS ********* //
+  user_id      String
+  user         User           @relation(fields: [user_id], references: [id])
+  schedule_id  String
+  schedule     Schedule?      @relation(fields: [schedule_id], references: [id])
+  availability Availability[]
+
+  // ******* CONSTRAINTS ********* //
+  @@unique([user_id, slug])
+}
+
+model Schedule {
+  id         String   @id @default(cuid())
+  name       String
+  time_zone  String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  // ******* RELATIONS ********* //
+  user_id      String
+  user         User           @relation(fields: [user_id], references: [id])
+  event_type   EventType[]
+  availability Availability[]
+}
+
+model Availability {
+  id         String   @id @default(cuid())
+  days       Int[]
+  start_time DateTime
+  end_time   DateTime
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  // ******* RELATIONS ********* //
+  user_id       String
+  user          User      @relation(fields: [user_id], references: [id])
+  event_type_id String
+  event_type    EventType @relation(fields: [event_type_id], references: [id])
+  schedule_id   String
+  schedule      Schedule  @relation(fields: [schedule_id], references: [id])
+}
