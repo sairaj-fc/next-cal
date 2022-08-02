@@ -30,7 +30,7 @@ model Event {
   title       String
   slug        String
   length      Int
-  time_zone   String
+  time_zone   String?
   description String?
   locations   Json?
   created_at  DateTime @default(now())
@@ -49,7 +49,7 @@ model Event {
 model Schedule {
   id         String   @id @default(cuid())
   name       String
-  time_zone  String
+  time_zone  String?
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
