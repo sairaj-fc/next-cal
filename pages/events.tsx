@@ -5,8 +5,10 @@ import type { Availability, Event, Schedule } from "@prisma/client";
 import { Button } from "@comps/Button";
 import { useAuth } from "./_app";
 import Link from "next/link";
+import { useRouter } from "next/router";
 
 const EventsPage = () => {
+  const router = useRouter();
   const { user } = useAuth();
   const { data, loading, error } = useGet<Event[]>(async () => {
     const res = await axios.get("/api/event");
@@ -93,25 +95,51 @@ const EventsPage = () => {
         ) : (
           <div className="mt-4">
             {data.map((event) => (
-              <Link href={`/events/${event.id}`} key={event.id}>
-                <a className="block hover:bg-gray-100 py-4 px-3">
-                  <div className="flex space-x-2 items-baseline">
-                    <h3 className="text-slate-900 text-xl">{event.title}</h3>
-                    <p className="text-sm">{`${
-                      user.user.username || "sairaj"
-                    }/${event.slug}`}</p>
+              <div key={event.id} className="flex justify-between items-center">
+                <Link href={`/events/${event.id}`} key={event.id}>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <a className="block cursor-pointer">
+                        <div className="flex space-x-2 items-baseline">
+                          <h3 className="text-slate-900 text-xl">
+                            {event.title}
+                          </h3>
+                          <p className="text-sm">{`${
+                            user.user.username || "sairaj"
+                          }/${event.slug}`}</p>
+                        </div>
+                      </a>
+                      {event.description && (
+                        <p className="text-gray-500">{event.description}</p>
+                      )}
+                      <div className="mt-3">
+                        <p className="text-gray-900 text-sm bg-gray-200 rounded-full w-fit px-2 py-0.5">
+                          {" "}
+                          ⏱ {event.length}min
+                        </p>
+                      </div>
+                    </div>
                   </div>
-                  {event.description && (
-                    <p className="text-gray-500">{event.description}</p>
-                  )}
-                  <div className="mt-3">
-                    <p className="text-gray-900 text-sm bg-gray-200 rounded-full w-fit px-2 py-0.5">
-                      {" "}
-                      ⏱ {event.length}min
-                    </p>
-                  </div>
-                </a>
-              </Link>
+                </Link>
+                <div className="space-x-4">
+                  <a
+                    href={`http://localhost:3002/${event.id}/${event.slug}`}
+                    className="w-8 h-8 inline-flex items-center justify-center text-lg bg-gray-100 hover:bg-gray-200"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    ↗️
+                  </a>
+                  <button
+                    onClick={(e) => {
+                      console.log("hi");
+                    }}
+                    className="w-8 h-8 text-lg bg-gray-100 hover:bg-gray-200"
+                  >
+                    ✏️
+                  </button>
+                </div>
+              </div>
             ))}
           </div>
         )}

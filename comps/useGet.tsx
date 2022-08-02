@@ -1,11 +1,16 @@
 import { useEffect, useState } from "react";
 
-export const useGet = <Data,>(arg: () => Promise<Data>) => {
+type Opts = {
+  disabled?: boolean;
+};
+
+export const useGet = <Data,>(arg: () => Promise<Data>, opts?: Opts) => {
   const [l, sl] = useState(true);
   const [e, se] = useState(null);
   const [d, sd] = useState<Data | null>(null);
 
   useEffect(() => {
+    if (opts && opts.disabled && typeof opts.disabled === "boolean") return;
     (async () => {
       try {
         const res = await arg();
@@ -16,7 +21,7 @@ export const useGet = <Data,>(arg: () => Promise<Data>) => {
         sl(false);
       }
     })();
-  }, []);
+  }, [opts]);
 
   return {
     loading: l,
