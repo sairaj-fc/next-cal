@@ -16,10 +16,14 @@ import dayjs, { ConfigType, Dayjs } from "@lib/dayjs";
 import {
   defaultDayRange,
   DEFAULT_SCHEDULE,
+  getAvailabilityFromSchedule,
   Schedule,
   TimeRange,
   weekdayNames,
 } from "@lib/utils";
+import prisma from "../prisma";
+import { PrismaClient } from "@prisma/client";
+import axios from "axios";
 
 const Button = ({ ...props }: any) => {
   return (
@@ -60,6 +64,7 @@ const Home: NextPage = () => {
 
   return (
     <div className="w-1/2  mx-auto">
+      <Button onClick={() => axios.post("/api/user")}>Create dummy user</Button>
       <div className=" mt-16 space-y-4">
         <div>
           <div className="text-base flex items-center justify-between mb-1">
@@ -108,8 +113,14 @@ const useAvailability = () => useContext(AvailabilityContext);
 const Availablility = ({ name }: { name: string }) => {
   const [schedule, setSchedule] = useState(DEFAULT_SCHEDULE);
 
-  const onSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    const avai = getAvailabilityFromSchedule(schedule);
+
+    const res = await axios.post("/api/schedule", {
+      availability: avai,
+    });
+    console.log(res);
   };
 
   return (
@@ -119,7 +130,7 @@ const Availablility = ({ name }: { name: string }) => {
         setSchedule,
       }}
     >
-      <form onSubmit={onSubmit}>
+      <form onSubmit={onSubmit} className="mb-8">
         <fieldset className="divide-y divide-gray-200 my-16">
           {weekdayNames("en").map((weekday, num) => (
             <ScheduleBlock key={num} name={name} weekday={weekday} day={num} />
