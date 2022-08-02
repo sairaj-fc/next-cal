@@ -110,7 +110,7 @@ const Availablility = ({ name }: { name: string }) => {
         setSchedule,
       }}
     >
-      <form onSubmit={onSubmit} className="mb-8">
+      <form autoComplete="off" onSubmit={onSubmit} className="mb-8">
         <label className="block mt-4" htmlFor="scheduleName">
           Schedule Name
         </label>

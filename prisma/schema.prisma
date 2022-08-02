@@ -63,12 +63,12 @@ model Schedule {
 model Availability {
   id         String   @id @default(cuid())
   days       Int[]
-  start_time DateTime
-  end_time   DateTime
+  start_time DateTime @db.Time
+  end_time   DateTime @db.Time
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
   // ******* RELATIONS ********* //
   schedule_id String
-  schedule    Schedule @relation(fields: [schedule_id], references: [id])
+  schedule    Schedule @relation(fields: [schedule_id], references: [id], onDelete: Cascade)
 }
