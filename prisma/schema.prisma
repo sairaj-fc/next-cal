@@ -38,9 +38,9 @@ model Event {
 
   // ******* RELATIONS ********* //
   user_id     String
-  user        User      @relation(fields: [user_id], references: [id])
+  user        User     @relation(fields: [user_id], references: [id])
   schedule_id String
-  schedule    Schedule? @relation(fields: [schedule_id], references: [id])
+  schedule    Schedule @relation(fields: [schedule_id], references: [id])
 
   // ******* CONSTRAINTS ********* //
   @@unique([user_id, slug])
