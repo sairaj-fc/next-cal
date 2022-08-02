@@ -12,8 +12,8 @@ export default function Login() {
   const handleLogin = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const data = new FormData(e.currentTarget);
-    const email = data.get("email");
-    const password = data.get("password");
+    const email = data.get("email") as string;
+    const password = data.get("password") as string;
 
     login({
       email,

@@ -103,7 +103,9 @@ function MyApp({ Component, pageProps }: AppProps) {
       }}
     >
       <Header />
-      <Component {...pageProps} />
+      <div className="w-2/3 mx-auto mt-8">
+        <Component {...pageProps} />
+      </div>
     </Context.Provider>
   );
 }
