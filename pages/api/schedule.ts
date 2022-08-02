@@ -9,11 +9,12 @@ export default async function handler(
   if (req.method === "POST") {
     const availability = req.body.availability;
     const name = req.body.name;
+    const timezone = req.body.timezone;
 
     const scheduleCreatePromise = await prisma.schedule.create({
       data: {
         name: name,
-        time_zone: "Asia/Kolkata",
+        time_zone: timezone || "Asia/Kolkata",
         user_id: "cl6brtpja0005rhud3jim8xef",
         availability: {
           createMany: {

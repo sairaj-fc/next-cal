@@ -28,6 +28,7 @@ import axios from "axios";
 import { Button } from "@comps/Button";
 import { useOnClickOutside } from "@comps/useOnClickOutside";
 import Link from "next/link";
+import TimezoneSelect from "react-timezone-select";
 
 const AvailabilityPage = () => {
   const { data, loading, error } = useGet<
@@ -70,6 +71,7 @@ const AvailabilityPage = () => {
         <h1 className="text-2xl text-black font-semibold">
           Create Availability
         </h1>
+
         <Availablility name="schedule" />
       </div>
     </div>
@@ -91,6 +93,7 @@ const useAvailability = () => useContext(AvailabilityContext);
 const Availablility = ({ name }: { name: string }) => {
   const [schedule, setSchedule] = useState(DEFAULT_SCHEDULE);
   const [scheduleName, setScheduleName] = useState("");
+  const [selectedTimezone, setSelectedTimezone] = useState(dayjs.tz.guess());
 
   const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -99,6 +102,7 @@ const Availablility = ({ name }: { name: string }) => {
     const res = await axios.post("/api/schedule", {
       availability: avai,
       name: scheduleName,
+      timezone: selectedTimezone,
     });
     console.log(res);
   };
@@ -111,17 +115,34 @@ const Availablility = ({ name }: { name: string }) => {
       }}
     >
       <form autoComplete="off" onSubmit={onSubmit} className="mb-8">
-        <label className="block mt-4" htmlFor="scheduleName">
-          Schedule Name
-        </label>
-        <input
-          type="text"
-          value={scheduleName}
-          onChange={(e) => {
-            setScheduleName(e.target.value);
-          }}
-          id="scheduleName"
-        />
+        <div className="flex items-center justify-between space-x-6">
+          <div>
+            <label className="block mt-4" htmlFor="scheduleName">
+              Schedule Name
+            </label>
+            <input
+              type="text"
+              value={scheduleName}
+              onChange={(e) => {
+                setScheduleName(e.target.value);
+              }}
+              id="scheduleName"
+            />
+          </div>
+          <div className="w-full h-full mt-3">
+            <div className="text-base flex items-center justify-between">
+              <label htmlFor="timezone">Select Timezone</label>
+              <span className="text-black">
+                Current Time {dayjs().tz(selectedTimezone).format("LT")}
+              </span>
+            </div>
+            <TimezoneSelect
+              id="timezone"
+              value={selectedTimezone}
+              onChange={({ value }) => setSelectedTimezone(value)}
+            />
+          </div>
+        </div>
         <fieldset className="divide-y divide-gray-200 mb-16 mt-6">
           {weekdayNames("en").map((weekday, num) => (
             <ScheduleBlock key={num} name={name} weekday={weekday} day={num} />
