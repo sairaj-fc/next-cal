@@ -16,7 +16,7 @@
     "incremental": true,
     "baseUrl": ".",
     "paths": {
-      // "@/components/*": ["components/*"]
+      "@comps/*": ["comps/*"],
       "@lib/*": ["lib/*"]
     }
   },

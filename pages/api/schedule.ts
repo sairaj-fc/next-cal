@@ -8,10 +8,11 @@ export default async function handler(
 ) {
   if (req.method === "POST") {
     const availability = req.body.availability;
+    const name = req.body.name;
 
     const scheduleCreatePromise = await prisma.schedule.create({
       data: {
-        name: "My Schedule",
+        name: name,
         time_zone: "Asia/Kolkata",
         user_id: "cl6brtpja0005rhud3jim8xef",
         availability: {
@@ -22,6 +23,18 @@ export default async function handler(
       },
     });
     return res.status(200).json({ res: scheduleCreatePromise });
+  }
+
+  if (req.method === "GET") {
+    const schedules = await prisma.schedule.findMany({
+      where: {
+        user_id: "cl6brtpja0005rhud3jim8xef",
+      },
+      include: {
+        availability: true,
+      },
+    });
+    return res.status(200).json({ schedules: schedules });
   }
 
   res.status(200).json({ name: "John Doe" });
