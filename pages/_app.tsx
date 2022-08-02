@@ -68,14 +68,12 @@ function MyApp({ Component, pageProps }: AppProps) {
       token: null,
     });
   };
-  console.log(user);
 
   useEffect(() => {
     const userFromLocal = localStorage.getItem("user") || "{}";
     const thing = JSON.parse(userFromLocal);
 
     if (thing && thing.user) {
-      console.log(1);
       setUser({
         ...thing,
       });

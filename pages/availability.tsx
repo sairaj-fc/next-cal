@@ -95,6 +95,8 @@ const Availablility = ({ name }: { name: string }) => {
   const [scheduleName, setScheduleName] = useState("");
   const [selectedTimezone, setSelectedTimezone] = useState(dayjs.tz.guess());
 
+  console.log(selectedTimezone);
+
   const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const avai = getAvailabilityFromSchedule(schedule);
@@ -139,7 +141,10 @@ const Availablility = ({ name }: { name: string }) => {
             <TimezoneSelect
               id="timezone"
               value={selectedTimezone}
-              onChange={({ value }) => setSelectedTimezone(value)}
+              onChange={({ value, ...rest }) => {
+                console.log(rest);
+                setSelectedTimezone(value);
+              }}
             />
           </div>
         </div>
