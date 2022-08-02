@@ -1,15 +1,24 @@
 /* eslint-disable @next/next/no-img-element */
 
+import axios from "axios";
+import { useRouter } from "next/router";
 import { FormEvent } from "react";
+import { useAuth } from "./_app";
 
 export default function Login() {
-  const handleLogin = (e: FormEvent<HTMLFormElement>) => {
+  const router = useRouter();
+  const { login } = useAuth();
+
+  const handleLogin = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const data = new FormData(e.currentTarget);
     const email = data.get("email");
     const password = data.get("password");
 
-    console.log(email, password);
+    login({
+      email,
+      password,
+    });
   };
 
   return (
@@ -47,6 +56,7 @@ export default function Login() {
                 </label>
                 <div className="mt-1">
                   <input
+                    defaultValue="sairaj2119@gmail.com"
                     id="email"
                     name="email"
                     type="email"
@@ -66,6 +76,7 @@ export default function Login() {
                 </label>
                 <div className="mt-1">
                   <input
+                    defaultValue="aunzbedi"
                     id="password"
                     name="password"
                     type="password"
