@@ -24,3 +24,12 @@ export type Dayjs = dayjs.Dayjs;
 export type { ConfigType } from "dayjs";
 
 export default dayjs;
+
+export const guess_timezone = () => {
+  const timezone = dayjs.tz.guess();
+
+  if (timezone === "Asia/Calcutta") {
+    return "Asia/Kolkata";
+  }
+  return timezone;
+};

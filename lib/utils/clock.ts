@@ -1,4 +1,4 @@
-import dayjs from "../dayjs";
+import dayjs, { guess_timezone } from "../dayjs";
 
 // TODO: In case of an embed if localStorage is not available(third party), use localStorage of parent(first party) that contains the iframe.
 export const localStorage = {
@@ -39,7 +39,7 @@ const initClock = () => {
   }
 
   timeOptions.inviteeTimeZone =
-    localStorage.getItem("timeOption.preferredTimeZone") || dayjs.tz.guess();
+    localStorage.getItem("timeOption.preferredTimeZone") || guess_timezone();
 };
 
 function setTimeZone(selectedTimeZone: string) {

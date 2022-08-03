@@ -6,7 +6,7 @@ import { useAuth } from "pages/_app";
 import axios from "axios";
 import { Event, User } from "@prisma/client";
 import { time_zone as local_storage_time_zone } from "@lib/utils/clock";
-import dayjs from "@lib/dayjs";
+import dayjs, { guess_timezone } from "@lib/dayjs";
 import TimezoneSelect, { ITimezone, allTimezones } from "react-timezone-select";
 
 type ClientEventPreviewPageProps = {
@@ -21,7 +21,7 @@ const ClientEventPreviewPage = ({
   const [timeZone, setTimeZone] = useState<string>();
 
   useEffect(() => {
-    setTimeZone(local_storage_time_zone() || dayjs.tz.guess());
+    setTimeZone(local_storage_time_zone() || "Asia/Kolkata");
   }, []);
 
   if (!timeZone) {
