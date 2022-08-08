@@ -1,12 +1,12 @@
 import { useGet } from "@comps/useGet";
 import { useRouter } from "next/router";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useAuth } from "pages/_app";
 import axios from "axios";
 import { Event, User } from "@prisma/client";
 import { time_zone as local_storage_time_zone } from "@lib/utils/clock";
-import dayjs, { guess_timezone } from "@lib/dayjs";
+import dayjs, { Dayjs, guess_timezone } from "@lib/dayjs";
 import TimezoneSelect, { ITimezone, allTimezones } from "react-timezone-select";
 
 type ClientEventPreviewPageProps = {
@@ -58,8 +58,80 @@ const ClientEventPreviewPage = ({
           ))}
         </select>
       </div>
+
+      <div>
+        <SlotPicker event={event} timeZone={timeZone} />
+      </div>
     </div>
   );
+};
+
+const SlotPicker = ({
+  event,
+  timeFormat = "hh:mm a",
+  timeZone,
+  weekStart = 0,
+}: {
+  event: Pick<Event, "id" | "slug">;
+  timeFormat?: string;
+  timeZone?: string;
+  weekStart?: 0 | 1 | 2 | 3 | 4 | 5 | 6;
+}) => {
+  const [selectedDate, setSelectedDate] = useState<Dayjs>();
+  const [browsingDate, setBrowsingDate] = useState<Dayjs>();
+  const { date, setQuery: setDate } = useRouterQuery("date");
+  const { month, setQuery: setMonth } = useRouterQuery("month");
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!router.isReady) return;
+
+    // Etc/GMT is not actually a timeZone, so handle this select option explicitly to prevent a hard crash.
+    if (timeZone === "Etc/GMT") {
+      setBrowsingDate(
+        dayjs
+          .utc(month)
+          .set("date", 1)
+          .set("hour", 0)
+          .set("minute", 0)
+          .set("second", 0)
+      );
+      if (date) {
+        setSelectedDate(dayjs.utc(date));
+      }
+    } else {
+      // Set the start of the month without shifting time like startOf() may do.
+      setBrowsingDate(
+        dayjs
+          .tz(month, timeZone)
+          .set("date", 1)
+          .set("hour", 0)
+          .set("minute", 0)
+          .set("second", 0)
+      );
+      if (date) {
+        // It's important to set the date immediately to the timeZone, dayjs(date) will convert to browsertime.
+        setSelectedDate(dayjs.tz(date, timeZone));
+      }
+    }
+  }, [router.isReady, month, date, timeZone]);
+
+  const res_1 = useSlots({
+    eventId: event.id,
+    startTime: selectedDate?.startOf("day"),
+    endTime: selectedDate?.endOf("day"),
+    timeZone,
+  });
+  const res_2 = useSlots({
+    eventId: event.id,
+    startTime: browsingDate?.startOf("month"),
+    endTime: browsingDate?.endOf("month"),
+    timeZone,
+  });
+
+  // const slots = useMemo(() => ({ ..._1, ..._2 }), [_1, _2]);
+
+  return <div>Slot Picker</div>;
 };
 
 const EventSlug = () => {
@@ -101,7 +173,6 @@ const EventSlug = () => {
     return <div>Loading...</div>;
   }
 
-  console.log(data);
   return (
     <div>
       {data && (
@@ -112,3 +183,90 @@ const EventSlug = () => {
 };
 
 export default EventSlug;
+
+const useRouterQuery = <T extends string>(name: T) => {
+  const router = useRouter();
+  const query = router.query;
+
+  const setQuery = (newValue: string | number | null | undefined) => {
+    router.replace(
+      { query: { ...router.query, [name]: newValue } },
+      undefined,
+      { shallow: true }
+    );
+  };
+
+  return { [name]: query[name], setQuery } as {
+    [K in T]: string | undefined;
+  } & { setQuery: typeof setQuery };
+};
+
+const useSlots = ({
+  eventId,
+  startTime,
+  endTime,
+  timeZone,
+}: {
+  eventId: string;
+  startTime?: Dayjs;
+  endTime?: Dayjs;
+  timeZone?: string;
+}) => {
+  const [data, setData] = useState<any>();
+  const [cachedSlots, setCachedSlots] = useState<any>({});
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+
+  useEffect(() => {
+    (async () => {
+      // type GetScheduleInput = {
+      //   timezone?: string | undefined;
+      //   eventId?: string | undefined;
+      //   startTime: string;
+      //   endTime: string;
+      //   // usernameList?: string[] | undefined;
+      // };
+      let url = `/api/slots/getSchedule`;
+      url += `?eventId=${eventId}`;
+      url += `&timezone=${timeZone}`;
+      url += `&startTime=${startTime?.toISOString() || ""}`;
+      url += `&endTime=${endTime?.toISOString() || ""}`;
+
+      if (startTime && endTime) {
+        const res = await axios.get(url);
+        return {
+          res,
+        };
+      }
+
+      return {
+        slots: {},
+      };
+    })();
+  }, [endTime, eventId, startTime, timeZone]);
+
+  // const { data, isLoading, isIdle } = trpc.useQuery(
+  //   [
+  //     "viewer.public.slots.getSchedule",
+  //     {
+  //       eventTypeId,
+  //       startTime: startTime?.toISOString() || "",
+  //       endTime: endTime?.toISOString() || "",
+  //       timeZone,
+  //     },
+  //   ],
+  //   { enabled: !!startTime && !!endTime }
+  // );
+
+  // const [cachedSlots, setCachedSlots] = useState<NonNullable<typeof data>["slots"]>({});
+
+  // useEffect(() => {
+  //   if (data?.slots) {
+  //     setCachedSlots((c) => ({ ...c, ...data?.slots }));
+  //   }
+  // }, [data]);
+
+  // // The very first time isIdle is set if auto-fetch is disabled, so isIdle should also be considered a loading state.
+  // return { slots: cachedSlots, isLoading: isLoading || isIdle };
+  return {};
+};

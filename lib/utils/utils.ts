@@ -1,4 +1,5 @@
 import { Availability } from "@prisma/client";
+import dayjs, { ConfigType } from "../dayjs";
 
 // By default starts on Sunday (Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday)
 export function weekdayNames(
@@ -130,4 +131,95 @@ export function availabilityAsString(availability: Availability) {
   };
 
   return weekSpan(availability) + ", " + timeSpan(availability);
+}
+
+export const MINUTES_IN_DAY = 60 * 24;
+export const MINUTES_DAY_END = MINUTES_IN_DAY - 1;
+export const MINUTES_DAY_START = 0;
+
+export type WorkingHours = {
+  days: number[];
+  startTime: number;
+  endTime: number;
+};
+
+export function getWorkingHours(
+  relativeTimeUnit: {
+    timeZone?: string;
+    utcOffset?: number;
+  },
+  availability: { days: number[]; startTime: ConfigType; endTime: ConfigType }[]
+) {
+  // clearly bail when availability is not set, set everything available.
+  if (!availability.length) {
+    return [
+      {
+        days: [0, 1, 2, 3, 4, 5, 6],
+        // shorthand for: dayjs().startOf("day").tz(timeZone).diff(dayjs.utc().startOf("day"), "minutes")
+        startTime: MINUTES_DAY_START,
+        endTime: MINUTES_DAY_END,
+      },
+    ];
+  }
+
+  console.log("asdf");
+
+  const utcOffset =
+    relativeTimeUnit.utcOffset ??
+    dayjs().tz(relativeTimeUnit.timeZone).utcOffset();
+
+  const workingHours = availability.reduce(
+    (workingHours: WorkingHours[], schedule) => {
+      // Get times localised to the given utcOffset/timeZone
+      const startTime =
+        dayjs.utc(schedule.startTime).get("hour") * 60 +
+        dayjs.utc(schedule.startTime).get("minute") -
+        utcOffset;
+      const endTime =
+        dayjs.utc(schedule.endTime).get("hour") * 60 +
+        dayjs.utc(schedule.endTime).get("minute") -
+        utcOffset;
+      // add to working hours, keeping startTime and endTimes between bounds (0-1439)
+      const sameDayStartTime = Math.max(
+        MINUTES_DAY_START,
+        Math.min(MINUTES_DAY_END, startTime)
+      );
+      const sameDayEndTime = Math.max(
+        MINUTES_DAY_START,
+        Math.min(MINUTES_DAY_END, endTime)
+      );
+
+      if (sameDayStartTime !== sameDayEndTime) {
+        workingHours.push({
+          days: schedule.days,
+          startTime: sameDayStartTime,
+          endTime: sameDayEndTime,
+        });
+      }
+      // check for overflow to the previous day
+      // overflowing days constraint to 0-6 day range (Sunday-Saturday)
+      if (startTime < MINUTES_DAY_START || endTime < MINUTES_DAY_START) {
+        workingHours.push({
+          days: schedule.days.map((day) => (day - 1 >= 0 ? day - 1 : 6)),
+          startTime: startTime + MINUTES_IN_DAY,
+          endTime: Math.min(endTime + MINUTES_IN_DAY, MINUTES_DAY_END),
+        });
+      }
+      // else, check for overflow in the next day
+      else if (startTime > MINUTES_DAY_END || endTime > MINUTES_DAY_END) {
+        workingHours.push({
+          days: schedule.days.map((day) => (day + 1) % 7),
+          startTime: Math.max(startTime - MINUTES_IN_DAY, MINUTES_DAY_START),
+          endTime: endTime - MINUTES_IN_DAY,
+        });
+      }
+
+      return workingHours;
+    },
+    []
+  );
+
+  workingHours.sort((a, b) => a.startTime - b.startTime);
+
+  return workingHours;
 }

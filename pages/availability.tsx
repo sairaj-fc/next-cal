@@ -61,7 +61,9 @@ const AvailabilityPage = () => {
             <Link href={`availability/${s.id}`} key={s.id}>
               <a className="block hover:bg-gray-100 py-4 px-3">
                 <h3 className="text-slate-700 text-xl">{s.name}</h3>
-                <div>{availabilityAsString(s.availability[0])}</div>
+                {s.availability.map((i) => (
+                  <div key={`${i.id}`}>{availabilityAsString(i)}</div>
+                ))}
               </a>
             </Link>
           ))}
@@ -94,8 +96,6 @@ const Availablility = ({ name }: { name: string }) => {
   const [schedule, setSchedule] = useState(DEFAULT_SCHEDULE);
   const [scheduleName, setScheduleName] = useState("");
   const [selectedTimezone, setSelectedTimezone] = useState(dayjs.tz.guess());
-
-  console.log(selectedTimezone);
 
   const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();

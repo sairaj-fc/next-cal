@@ -82,8 +82,8 @@ const EventsPage = () => {
     };
     if (newEvent.schedule_id === "") return;
 
-    const res = await axios.post("/api/event", newEvent);
-    console.log(res);
+    console.log(newEvent);
+    // const res = await axios.post("/api/event", newEvent);
   };
 
   return (
