@@ -9,6 +9,7 @@ import dayjs, { Dayjs, guess_timezone } from "@lib/dayjs";
 import TimezoneSelect, { ITimezone, allTimezones } from "react-timezone-select";
 import DatePicker from "@comps/DatePicker";
 import { classNames } from "@lib/utils";
+import AvailableTimes from "@comps/AvailableTime";
 
 type ClientEventPreviewPageProps = {
   event: Event;
@@ -132,10 +133,13 @@ const SlotPicker = ({
   const slots = useMemo(() => ({ ..._1, ..._2 }), [_1, _2]);
 
   return (
-    <div className="py-16">
+    <div className="py-16 grid grid-cols-12 gap-x-12">
       <DatePicker
         isLoading={_2Loading}
-        className={classNames("mt-8 w-full sm:mt-0 sm:min-w-[455px]")}
+        className={classNames(
+          "mt-8 w-full",
+          selectedDate ? "col-span-8" : "col-span-12"
+        )}
         includedDates={Object.keys(slots).filter((k) => slots[k].length > 0)}
         locale={"en"}
         selected={selectedDate}
@@ -148,6 +152,20 @@ const SlotPicker = ({
         browsingDate={browsingDate}
         weekStart={weekStart}
       />
+      {selectedDate && (
+        <div className="col-span-4">
+          <AvailableTimes
+            isLoading={_2Loading}
+            slots={slots[selectedDate.format("YYYY-MM-DD")]}
+            date={selectedDate}
+            timeFormat={timeFormat}
+            eventTypeId={event.id}
+            eventTypeSlug={event.slug}
+            users={[]}
+            recurringCount={undefined}
+          />
+        </div>
+      )}
     </div>
   );
 };
