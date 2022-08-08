@@ -219,24 +219,24 @@ const useSlots = ({
 
   useEffect(() => {
     (async () => {
-      // type GetScheduleInput = {
-      //   timezone?: string | undefined;
-      //   eventId?: string | undefined;
-      //   startTime: string;
-      //   endTime: string;
-      //   // usernameList?: string[] | undefined;
-      // };
-      // let url = `/api/slots/getSchedule`;
-      // url += `?eventId=${eventId}`;
-      // url += `&timezone=${timeZone}`;
-      // url += `&startTime=${startTime?.toISOString() || ""}`;
-      // url += `&endTime=${endTime?.toISOString() || ""}`;
-      // if (startTime && endTime) {
-      //   const res = await axios.get(url);
-      //   return {
-      //     res,
-      //   };
-      // }
+      type GetScheduleInput = {
+        timezone?: string | undefined;
+        eventId?: string | undefined;
+        startTime: string;
+        endTime: string;
+        // usernameList?: string[] | undefined;
+      };
+      let url = `/api/slots/getSchedule`;
+      url += `?eventId=${eventId}`;
+      url += `&timezone=${timeZone}`;
+      url += `&startTime=${startTime?.toISOString() || ""}`;
+      url += `&endTime=${endTime?.toISOString() || ""}`;
+      if (startTime && endTime) {
+        const res = await axios.get(url);
+        return {
+          res,
+        };
+      }
     })();
   }, [endTime, eventId, startTime, timeZone]);
 

@@ -69,13 +69,6 @@ export default async function handler(
 
     const slots: Record<string, Slot[]> = {};
     let time = startTime;
-    console.log("getSlots:237", {
-      inviteeDate: time,
-      eventLength: eventType.length,
-      workingHours,
-      minimumBookingNotice: 120,
-      frequency: 30,
-    });
 
     do {
       const times = getSlots({
@@ -85,12 +78,14 @@ export default async function handler(
         minimumBookingNotice: 120,
         frequency: 30,
       });
-      slots[time.format("YYYY-MM-DD")] = times.map((t) => ({
-        time: t.toISOString(),
+      slots[time.format("YYYY-MM-DD")] = times.map((item) => ({
+        time: item.toISOString(),
       }));
+
+      time = time.add(1, "day");
     } while (time.isBefore(endTime));
 
-    res.status(200).json({ hi: ["bye"] });
+    res.status(200).json({ slots });
   }
 }
 
