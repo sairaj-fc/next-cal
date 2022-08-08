@@ -130,18 +130,12 @@ const SlotPicker = ({
     timeZone,
   });
   const slots = useMemo(() => ({ ..._1, ..._2 }), [_1, _2]);
-  console.log(slots);
 
   return (
-    <div>
+    <div className="py-16">
       <DatePicker
         isLoading={_2Loading}
-        className={classNames(
-          "mt-8 w-full sm:mt-0 sm:min-w-[455px]",
-          selectedDate
-            ? "sm:w-1/2 sm:border-r sm:pl-4 sm:pr-6 sm:dark:border-gray-700 md:w-1/3 "
-            : "sm:pl-4"
-        )}
+        className={classNames("mt-8 w-full sm:mt-0 sm:min-w-[455px]")}
         includedDates={Object.keys(slots).filter((k) => slots[k].length > 0)}
         locale={"en"}
         selected={selectedDate}

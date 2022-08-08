@@ -62,9 +62,9 @@ export const Day = ({
   return (
     <button
       className={classNames(
-        "hover:border-brand disabled:text-bookinglighter absolute top-0 left-0 right-0 bottom-0 mx-auto w-full rounded-sm border border-transparent text-center font-medium disabled:cursor-default disabled:border-transparent disabled:font-light",
+        "hover:border-blue-500 disabled:text-bookinglighter absolute top-0 left-0 right-0 bottom-0 mx-auto w-full rounded-sm border border-transparent text-center font-medium disabled:cursor-default disabled:border-transparent disabled:font-light",
         active
-          ? "bg-brand text-brandcontrast "
+          ? "bg-blue-500 text-white"
           : !props.disabled
           ? " bg-gray-100"
           : ""
@@ -134,10 +134,6 @@ const Days = ({
               date={day}
               onClick={() => {
                 props.onChange(day);
-                window.scrollTo({
-                  top: 360,
-                  behavior: "smooth",
-                });
               }}
               disabled={
                 (includedDates && !includedDates.includes(yyyymmdd(day))) ||
