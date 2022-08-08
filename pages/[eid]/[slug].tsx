@@ -116,20 +116,20 @@ const SlotPicker = ({
     }
   }, [router.isReady, month, date, timeZone]);
 
-  const res_1 = useSlots({
+  const { slots: _1, isLoading: _1Loading } = useSlots({
     eventId: event.id,
     startTime: selectedDate?.startOf("day"),
     endTime: selectedDate?.endOf("day"),
     timeZone,
   });
-  const res_2 = useSlots({
+  const { slots: _2, isLoading: _2Loading } = useSlots({
     eventId: event.id,
     startTime: browsingDate?.startOf("month"),
     endTime: browsingDate?.endOf("month"),
     timeZone,
   });
-
-  // const slots = useMemo(() => ({ ..._1, ..._2 }), [_1, _2]);
+  const slots = useMemo(() => ({ ..._1, ..._2 }), [_1, _2]);
+  console.log(slots);
 
   return <div>Slot Picker</div>;
 };
@@ -212,56 +212,40 @@ const useSlots = ({
   endTime?: Dayjs;
   timeZone?: string;
 }) => {
-  const [data, setData] = useState<any>();
-  const [cachedSlots, setCachedSlots] = useState<any>({});
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const [cachedSlots, setCachedSlots] = useState<Record<string, any>>({});
 
   useEffect(() => {
     (async () => {
-      type GetScheduleInput = {
-        timezone?: string | undefined;
-        eventId?: string | undefined;
-        startTime: string;
-        endTime: string;
-        // usernameList?: string[] | undefined;
-      };
+      // type GetScheduleInput = {
+      //   timezone?: string | undefined;
+      //   eventId?: string | undefined;
+      //   startTime: string;
+      //   endTime: string;
+      //   // usernameList?: string[] | undefined;
+      // };
       let url = `/api/slots/getSchedule`;
       url += `?eventId=${eventId}`;
       url += `&timezone=${timeZone}`;
       url += `&startTime=${startTime?.toISOString() || ""}`;
       url += `&endTime=${endTime?.toISOString() || ""}`;
-      if (startTime && endTime) {
-        const res = await axios.get(url);
-        return {
-          res,
-        };
+      if (startTime && endTime && Object.keys(cachedSlots).length === 0) {
+        try {
+          setIsLoading(true);
+          const res = await axios.get(url);
+          setCachedSlots(res.data.slots);
+        } catch (err) {
+          setError(err as any);
+        }
+        setIsLoading(false);
       }
     })();
-  }, [endTime, eventId, startTime, timeZone]);
+  }, [cachedSlots, endTime, eventId, startTime, timeZone]);
 
-  // const { data, isLoading, isIdle } = trpc.useQuery(
-  //   [
-  //     "viewer.public.slots.getSchedule",
-  //     {
-  //       eventTypeId,
-  //       startTime: startTime?.toISOString() || "",
-  //       endTime: endTime?.toISOString() || "",
-  //       timeZone,
-  //     },
-  //   ],
-  //   { enabled: !!startTime && !!endTime }
-  // );
-
-  // const [cachedSlots, setCachedSlots] = useState<NonNullable<typeof data>["slots"]>({});
-
-  // useEffect(() => {
-  //   if (data?.slots) {
-  //     setCachedSlots((c) => ({ ...c, ...data?.slots }));
-  //   }
-  // }, [data]);
-
-  // // The very first time isIdle is set if auto-fetch is disabled, so isIdle should also be considered a loading state.
-  // return { slots: cachedSlots, isLoading: isLoading || isIdle };
-  return {};
+  return {
+    slots: cachedSlots,
+    isLoading,
+    error,
+  };
 };
