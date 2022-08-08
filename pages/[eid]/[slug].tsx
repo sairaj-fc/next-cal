@@ -1,4 +1,3 @@
-import { useGet } from "@comps/useGet";
 import { useRouter } from "next/router";
 
 import React, { useEffect, useMemo, useState } from "react";
@@ -8,6 +7,8 @@ import { Event, User } from "@prisma/client";
 import { time_zone as local_storage_time_zone } from "@lib/utils/clock";
 import dayjs, { Dayjs, guess_timezone } from "@lib/dayjs";
 import TimezoneSelect, { ITimezone, allTimezones } from "react-timezone-select";
+import DatePicker from "@comps/DatePicker";
+import { classNames } from "@lib/utils";
 
 type ClientEventPreviewPageProps = {
   event: Event;
@@ -131,7 +132,30 @@ const SlotPicker = ({
   const slots = useMemo(() => ({ ..._1, ..._2 }), [_1, _2]);
   console.log(slots);
 
-  return <div>Slot Picker</div>;
+  return (
+    <div>
+      <DatePicker
+        isLoading={_2Loading}
+        className={classNames(
+          "mt-8 w-full sm:mt-0 sm:min-w-[455px]",
+          selectedDate
+            ? "sm:w-1/2 sm:border-r sm:pl-4 sm:pr-6 sm:dark:border-gray-700 md:w-1/3 "
+            : "sm:pl-4"
+        )}
+        includedDates={Object.keys(slots).filter((k) => slots[k].length > 0)}
+        locale={"en"}
+        selected={selectedDate}
+        onChange={(newDate) => {
+          setDate(newDate.format("YYYY-MM-DD"));
+        }}
+        onMonthChange={(newMonth) => {
+          setMonth(newMonth.format("YYYY-MM"));
+        }}
+        browsingDate={browsingDate}
+        weekStart={weekStart}
+      />
+    </div>
+  );
 };
 
 const EventSlug = () => {

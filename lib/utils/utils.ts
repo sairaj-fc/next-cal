@@ -1,5 +1,5 @@
 import { Availability } from "@prisma/client";
-import dayjs, { ConfigType } from "../dayjs";
+import dayjs, { ConfigType, Dayjs } from "../dayjs";
 
 // By default starts on Sunday (Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday)
 export function weekdayNames(
@@ -220,4 +220,17 @@ export function getWorkingHours(
   workingHours.sort((a, b) => a.startTime - b.startTime);
 
   return workingHours;
+}
+
+// converts a date to 2022-04-25 for example.
+export const yyyymmdd = (date: Date | Dayjs) =>
+  date instanceof Date
+    ? dayjs(date).format("YYYY-MM-DD")
+    : date.format("YYYY-MM-DD");
+
+export const daysInMonth = (date: Date | Dayjs) =>
+  date instanceof Date ? dayjs(date).daysInMonth() : date.daysInMonth();
+
+export function classNames(...classes: unknown[]) {
+  return classes.filter(Boolean).join(" ");
 }
