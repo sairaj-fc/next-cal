@@ -123,7 +123,7 @@ const EventsPage = () => {
                 </Link>
                 <div className="space-x-4">
                   <a
-                    href={`http://localhost:3002/${event.id}/${event.slug}`}
+                    href={`http://localhost:3001/${event.id}/${event.slug}`}
                     className="w-8 h-8 inline-flex items-center justify-center text-lg bg-gray-100 hover:bg-gray-200"
                     target="_blank"
                     rel="noopener noreferrer"

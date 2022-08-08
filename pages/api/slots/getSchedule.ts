@@ -67,9 +67,30 @@ export default async function handler(
       }))
     );
 
-    console.log("www", workingHours);
+    const slots: Record<string, Slot[]> = {};
+    let time = startTime;
+    console.log("getSlots:237", {
+      inviteeDate: time,
+      eventLength: eventType.length,
+      workingHours,
+      minimumBookingNotice: 120,
+      frequency: 30,
+    });
 
-    res.status(200).json({ res: eventType });
+    do {
+      const times = getSlots({
+        inviteeDate: time,
+        eventLength: eventType.length,
+        workingHours,
+        minimumBookingNotice: 120,
+        frequency: 30,
+      });
+      slots[time.format("YYYY-MM-DD")] = times.map((t) => ({
+        time: t.toISOString(),
+      }));
+    } while (time.isBefore(endTime));
+
+    res.status(200).json({ hi: ["bye"] });
   }
 }
 

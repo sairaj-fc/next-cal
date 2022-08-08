@@ -162,8 +162,6 @@ export function getWorkingHours(
     ];
   }
 
-  console.log("asdf");
-
   const utcOffset =
     relativeTimeUnit.utcOffset ??
     dayjs().tz(relativeTimeUnit.timeZone).utcOffset();

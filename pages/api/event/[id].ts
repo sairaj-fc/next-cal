@@ -5,10 +5,7 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  console.log("hit");
-  console.log(req.method);
   if (req.method === "GET") {
-    console.log("asdf");
     const slug = req.query.slug as string;
     const eventId = req.query.id as string;
     const user_id = req.query.user_id as string;

@@ -226,22 +226,17 @@ const useSlots = ({
       //   endTime: string;
       //   // usernameList?: string[] | undefined;
       // };
-      let url = `/api/slots/getSchedule`;
-      url += `?eventId=${eventId}`;
-      url += `&timezone=${timeZone}`;
-      url += `&startTime=${startTime?.toISOString() || ""}`;
-      url += `&endTime=${endTime?.toISOString() || ""}`;
-
-      if (startTime && endTime) {
-        const res = await axios.get(url);
-        return {
-          res,
-        };
-      }
-
-      return {
-        slots: {},
-      };
+      // let url = `/api/slots/getSchedule`;
+      // url += `?eventId=${eventId}`;
+      // url += `&timezone=${timeZone}`;
+      // url += `&startTime=${startTime?.toISOString() || ""}`;
+      // url += `&endTime=${endTime?.toISOString() || ""}`;
+      // if (startTime && endTime) {
+      //   const res = await axios.get(url);
+      //   return {
+      //     res,
+      //   };
+      // }
     })();
   }, [endTime, eventId, startTime, timeZone]);
 
