@@ -1,12 +1,14 @@
 // import { SchedulingType } from "@prisma/client";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { FC, useEffect, useState } from "react";
+import { FC, Fragment, useEffect, useState } from "react";
 
 import dayjs, { Dayjs } from "@lib/dayjs";
 
 import { classNames, nameOfDay } from "@lib/utils";
 import { time_zone } from "@lib/utils/clock";
+import { Dialog, Transition } from "@headlessui/react";
+import { Event, User } from "@prisma/client";
 
 export type Slot = {
   time: string;
@@ -21,12 +23,11 @@ type AvailableTimesProps = {
   recurringCount: number | undefined;
   eventTypeSlug: string;
   date: Dayjs;
-  users: {
-    username: string | null;
-  }[];
   seatsPerTimeSlot?: number | null;
   slots?: Slot[];
   isLoading: boolean;
+  profile: User;
+  event: Event;
 };
 
 const AvailableTimes: FC<AvailableTimesProps> = ({
@@ -35,22 +36,14 @@ const AvailableTimes: FC<AvailableTimesProps> = ({
   date,
   eventTypeId,
   eventTypeSlug,
-  recurringCount,
   timeFormat,
   seatsPerTimeSlot,
+  profile,
+  event,
 }) => {
   const router = useRouter();
-  const { rescheduleUid } = router.query;
-
-  const [brand, setBrand] = useState("#292929");
-
-  useEffect(() => {
-    setBrand(
-      getComputedStyle(document.documentElement)
-        .getPropertyValue("--brand-color")
-        .trim()
-    );
-  }, []);
+  const [isOpen, setIsOpen] = useState(false);
+  const [selectedTime, setSelectedTime] = useState<any>(null);
 
   return (
     <div className="mt-8 flex flex-col text-center">
@@ -77,20 +70,8 @@ const AvailableTimes: FC<AvailableTimesProps> = ({
                 date: dayjs(slot.time).format(),
                 type: eventTypeId,
                 slug: eventTypeSlug,
-                /** Treat as recurring only when a count exist and it's not a rescheduling workflow */
-                count:
-                  recurringCount && !rescheduleUid ? recurringCount : undefined,
               },
             };
-
-            if (rescheduleUid) {
-              bookingUrl.query.rescheduleUid = rescheduleUid as string;
-            }
-
-            // If event already has an attendee add booking id
-            if (slot.bookingUid) {
-              bookingUrl.query.bookingUid = slot.bookingUid;
-            }
 
             return (
               <div key={dayjs(slot.time).format()}>
@@ -100,10 +81,7 @@ const AvailableTimes: FC<AvailableTimesProps> = ({
                 slot.attendees >= seatsPerTimeSlot ? (
                   <div
                     className={classNames(
-                      "text-primary-500 mb-2 block rounded-sm border bg-white py-4 font-medium opacity-25  ",
-                      brand === "#fff" || brand === "#ffffff"
-                        ? "border-brandcontrast"
-                        : "border-brand"
+                      "text-primary-500 mb-2 block rounded-sm border bg-white py-4 font-medium opacity-25  "
                     )}
                   >
                     {dayjs(slot.time).tz(time_zone()).format(timeFormat)}
@@ -112,13 +90,16 @@ const AvailableTimes: FC<AvailableTimesProps> = ({
                     )}
                   </div>
                 ) : (
-                  <Link href={bookingUrl} prefetch={false}>
-                    <a
+                  <button
+                    className="w-full"
+                    onClick={() => {
+                      setIsOpen(true);
+                      setSelectedTime(slot);
+                    }}
+                  >
+                    <div
                       className={classNames(
-                        "text-primary-500 hover:bg-gray-100 text-gray-700 mb-2 block rounded-sm border bg-white py-4 font-medium ",
-                        brand === "#fff" || brand === "#ffffff"
-                          ? "border-brandcontrast"
-                          : "border-brand"
+                        "text-primary-500 hover:bg-gray-100 text-gray-700 mb-2 block rounded-sm border bg-white py-4 font-medium w-full"
                       )}
                       data-testid="time"
                     >
@@ -141,8 +122,8 @@ const AvailableTimes: FC<AvailableTimesProps> = ({
                           / {seatsPerTimeSlot} Seats Available
                         </p>
                       )}
-                    </a>
-                  </Link>
+                    </div>
+                  </button>
                 )}
               </div>
             );
@@ -156,6 +137,64 @@ const AvailableTimes: FC<AvailableTimesProps> = ({
 
         {isLoading && !slots.length && <>loading...</>}
       </div>
+      <Transition appear show={isOpen} as={Fragment}>
+        <Dialog
+          as="div"
+          className="relative z-10"
+          onClose={() => setIsOpen(false)}
+        >
+          <Transition.Child
+            as={Fragment}
+            enter="ease-out duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="fixed inset-0 bg-black bg-opacity-25" />
+          </Transition.Child>
+
+          <div className="fixed inset-0 overflow-y-auto">
+            <div className="flex min-h-full items-center justify-center p-4 text-center">
+              <Transition.Child
+                as={Fragment}
+                enter="ease-out duration-300"
+                enterFrom="opacity-0 scale-95"
+                enterTo="opacity-100 scale-100"
+                leave="ease-in duration-200"
+                leaveFrom="opacity-100 scale-100"
+                leaveTo="opacity-0 scale-95"
+              >
+                <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+                  <Dialog.Title
+                    as="h3"
+                    className="text-lg font-medium leading-6 text-gray-900"
+                  >
+                    Payment successful
+                  </Dialog.Title>
+                  <div className="mt-2">
+                    <p className="text-sm text-gray-500">
+                      Your payment has been successfully submitted. We’ve sent
+                      you an email with all of the details of your order.
+                    </p>
+                  </div>
+
+                  <div className="mt-4">
+                    <button
+                      type="button"
+                      className="inline-flex justify-center rounded-md border border-transparent bg-blue-100 px-4 py-2 text-sm font-medium text-blue-900 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      Got it, thanks!
+                    </button>
+                  </div>
+                </Dialog.Panel>
+              </Transition.Child>
+            </div>
+          </div>
+        </Dialog>
+      </Transition>
     </div>
   );
 };

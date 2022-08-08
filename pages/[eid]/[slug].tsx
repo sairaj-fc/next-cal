@@ -62,7 +62,7 @@ const ClientEventPreviewPage = ({
       </div>
 
       <div>
-        <SlotPicker event={event} timeZone={timeZone} />
+        <SlotPicker profile={profile} event={event} timeZone={timeZone} />
       </div>
     </div>
   );
@@ -73,11 +73,13 @@ const SlotPicker = ({
   timeFormat = "hh:mm a",
   timeZone,
   weekStart = 0,
+  profile,
 }: {
-  event: Pick<Event, "id" | "slug">;
+  event: Event;
   timeFormat?: string;
   timeZone?: string;
   weekStart?: 0 | 1 | 2 | 3 | 4 | 5 | 6;
+  profile: User;
 }) => {
   const [selectedDate, setSelectedDate] = useState<Dayjs>();
   const [browsingDate, setBrowsingDate] = useState<Dayjs>();
@@ -161,8 +163,9 @@ const SlotPicker = ({
             timeFormat={timeFormat}
             eventTypeId={event.id}
             eventTypeSlug={event.slug}
-            users={[]}
+            profile={profile}
             recurringCount={undefined}
+            event={event}
           />
         </div>
       )}
