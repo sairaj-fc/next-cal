@@ -23,6 +23,7 @@ model User {
   // ******* RELATIONS ********* //
   event    Event[]
   schedule Schedule[]
+  booking  Booking[]
 }
 
 model Event {
@@ -35,12 +36,15 @@ model Event {
   locations   Json?
   created_at  DateTime @default(now())
   updated_at  DateTime @updatedAt
+  price       Int      @default(0)
+  currency    String   @default("inr")
 
   // ******* RELATIONS ********* //
   user_id     String
-  user        User     @relation(fields: [user_id], references: [id])
+  user        User      @relation(fields: [user_id], references: [id])
   schedule_id String
-  schedule    Schedule @relation(fields: [schedule_id], references: [id])
+  schedule    Schedule  @relation(fields: [schedule_id], references: [id])
+  booking     Booking[]
 
   // ******* CONSTRAINTS ********* //
   @@unique([user_id, slug])
@@ -71,4 +75,23 @@ model Availability {
   // ******* RELATIONS ********* //
   schedule_id String
   schedule    Schedule @relation(fields: [schedule_id], references: [id], onDelete: Cascade)
+}
+
+model Booking {
+  id          String   @id @default(cuid())
+  uid         String   @unique
+  title       String
+  description String?
+  start_time  DateTime
+  end_time    DateTime
+  location    String?
+  created_at  DateTime @default(now())
+  updated_at  DateTime
+  paid        Boolean  @default(false)
+
+  // ******* RELATIONS ********* //
+  event_id String?
+  event    Event?  @relation(fields: [event_id], references: [id])
+  user_id  String?
+  user     User?   @relation(fields: [user_id], references: [id])
 }

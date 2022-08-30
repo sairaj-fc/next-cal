@@ -257,6 +257,7 @@ const LazySelect = ({
   const { setSchedule, schedule } = useAvailability();
 
   const [open, setOpen] = useState(false);
+
   useOnClickOutside(selectRef, () => {
     setOpen(false);
   });

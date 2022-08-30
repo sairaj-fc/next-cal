@@ -63,7 +63,7 @@ const AvailableTimes: FC<AvailableTimesProps> = ({
               pathname: string;
               query: Record<string, string | number | string[] | undefined>;
             };
-            const bookingUrl: BookingURL = {
+            const bookingDetails: BookingURL = {
               pathname: "book",
               query: {
                 ...router.query,
@@ -171,14 +171,14 @@ const AvailableTimes: FC<AvailableTimesProps> = ({
                     as="h3"
                     className="text-lg font-medium leading-6 text-gray-900"
                   >
-                    Payment successful
+                    {event.title}
                   </Dialog.Title>
                   <div className="mt-2">
-                    <p className="text-sm text-gray-500">
-                      Your payment has been successfully submitted. We’ve sent
-                      you an email with all of the details of your order.
-                    </p>
+                    <p className="text-sm text-gray-500">By {profile.email}</p>
+                    <p className="text-sm text-gray-500">{event.description}</p>
                   </div>
+                  <p>{event.length} min meet</p>
+                  <p>{dayjs(selectedTime?.time).toString()}</p>
 
                   <div className="mt-4">
                     <button
